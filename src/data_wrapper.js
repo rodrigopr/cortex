@@ -19,7 +19,17 @@ module.exports = function(_mixins, _cortexPubSub) {
   };
 
   DataWrapper.prototype.getValue = function() {
-    return this.__value;
+    var clone =  function(v) {
+      return $.extend(true, {}, v);
+    };
+
+    if(this.__isObject()) {
+      return clone(this.__value);
+    } else if(this.__isArray()) {
+      return this.__value.map(clone);
+    } else {
+      return this.__value;
+    }
   };
 
   // Short alias for getValue
