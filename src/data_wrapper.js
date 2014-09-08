@@ -13,20 +13,25 @@ module.exports = function(_mixins, _cortexPubSub) {
     this.__path = path || [];
     this.__wrap();
   }
-
   DataWrapper.prototype.set = function(value, forceUpdate) {
-    _cortexPubSub.publish("update" + this.__eventId, {value: value, path: this.__path, forceUpdate: forceUpdate});
+    _cortexPubSub.publish("update" + this.__eventId, {value: this.clone(value), path: this.__path, forceUpdate: forceUpdate});
+  };
+
+  DataWrapper.prototype.clone = function(v) {
+    if(v && v.constructor === Object) {
+      return $.extend(true, {}, v);
+    } else if(v && v.constructor === Array) {
+      return v.map(this.clone);
+    } else {
+      return v;
+    }
   };
 
   DataWrapper.prototype.getValue = function() {
-    var clone =  function(v) {
-      return $.extend(true, {}, v);
-    };
-
     if(this.__isObject()) {
-      return clone(this.__value);
+      return this.clone(this.__value);
     } else if(this.__isArray()) {
-      return this.__value.map(clone);
+      return this.__value.map(this.clone);
     } else {
       return this.__value;
     }
